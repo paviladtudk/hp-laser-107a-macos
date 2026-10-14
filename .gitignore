@@ -1,0 +1,4 @@
+build/
+install-log.txt
+diagnose-report.txt
+.DS_Store

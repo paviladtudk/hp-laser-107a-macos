@@ -1,0 +1,45 @@
+diff --git a/src/printer.cpp b/src/printer.cpp
+index e05a765..c8a9731 100644
+--- a/src/printer.cpp
++++ b/src/printer.cpp
+@@ -199,6 +199,40 @@ bool Printer::sendPJLHeader(const Request& request,
+ 
+     printf("%s", _beginPJL);
+ 
++    // HP Laser 10x / Samsung M2020 family: send exactly the PJL job header that
++    // HP's own Windows driver sends to these printers (CRLF line endings, no
++    // "@PJL DEFAULT POWERSAVE..." commands, which rewrite the printer's
++    // non-volatile settings on every job).
++    if (_specialBandWidth) {
++        const char *duplexMode = "OFF";
++        if (request.duplex() == Request::ManualLongEdge ||
++            request.duplex() == Request::ManualShortEdge)
++            duplexMode = "MANUAL";
++        printf("@PJL COMMENT USERNAME=\"%s\"\r\n", request.userName());
++        printf("@PJL COMMENT DOCNAME=\"%s\"\r\n", request.jobTitle());
++        printf("@PJL SET COPIES=1\r\n");
++        printf("@PJL SET COLORMODE=MONO\r\n");
++        printf("@PJL SET RESOLUTION=%lu\r\n", yResolution);
++        printf("@PJL SET IMAGEQUALITY=0\r\n");
++        printf("@PJL DEFAULT SERVICEDATE=%04u%02u%02u\r\n",
++            1900+timeinfo->tm_year, timeinfo->tm_mon+1, timeinfo->tm_mday);
++        printf("@PJL SET DUPLEX=%s\r\n", duplexMode);
++        printf("@PJL SET PAPERTYPE=OFF\r\n");
++        printf("@PJL SET BANNERSHEET=OFF\r\n");
++        printf("@PJL SET TIMESTAMP=OFF\r\n");
++        printf("@PJL SET USERNAME=\"%s\"\r\n", request.userName());
++        printf("@PJL SET JOBNAME=\"%s\"\r\n", request.jobTitle());
++        printf("@PJL SET ECONOMODE=%s\r\n",
++            (!request.ppd()->get("EconoMode").isNull() &&
++             request.ppd()->get("EconoMode") == "ON") ? "ON" : "OFF");
++        printf("@PJL SET ALTITUDE=NORMAL\r\n");
++        printf("@PJL SET XIGNOREFF=OFF\r\n");
++        printf("@PJL SET EDGEENHANCE=NORMAL\r\n");
++        printf("@PJL ENTER LANGUAGE = QPDL\r\n");
++        fflush(stdout);
++        return true;
++    }
++
+     if (0x15 == compression) {
+         printf("@PJL COMMENT USERNAME=\"Username: %s\"\n", request.userName());
+         printf("@PJL COMMENT DOCNAME=\"%s\"\n", request.jobTitle());
