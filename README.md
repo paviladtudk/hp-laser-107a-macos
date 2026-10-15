@@ -88,6 +88,29 @@ Every test document decodes back **pixel-exact** (A4, Letter, A5, Legal; text, d
 graphics, noise, blank; up to 12 pages). The tools are in `dev/`:
 `mkraster.c` generates CUPS rasters, and `splcheck.py` decodes and verifies an SPL/QPDL job.
 
+## Other printers (SPL/QPDL family)
+
+The HP Laser 107a is one of about 100 printers built on Samsung's SPL/QPDL engine. The
+[SpliX](https://github.com/OpenPrinting/splix) driver used here knows all of them. This
+repository is **set up and tested only for the HP Laser 103/107/108**, but the list below
+tells owners of related printers where they stand.
+
+| Family | Models | Notes |
+|---|---|---|
+| **HP (Samsung-made)** | Laser 103a/107a/107w/108a/108w · Laser MFP 135a/135w/137fnw (13x) · Laser 1003–1008 a/w · Laser MFP 1136–1139, 1188 · LaserJet MFP M433, M436 | SPL only, no HP Mac driver. The **MFP 135a/137fnw** also has the broken IPP-over-USB mode ([ipp-usb#52](https://github.com/OpenPrinting/ipp-usb/issues/52)) and is the closest relative; the 1003–1008 are covered by [hp-laser-1008a-macos](https://github.com/Kuberwastaken/hp-laser-1008a-macos). |
+| **Samsung Xpress / M** | M2020/M2022/M2026 (the original 107a), M2070, M262x/282x, M267x/287x, M283x | M20xx/M2070 are SPL only; some larger models also speak PCL. |
+| **Samsung ML** | ML-1510 … ML-3560 (e.g. ML-1660, ML-1860, ML-2160/2165, ML-2525, ML-2580) | Mostly SPL only. |
+| **Samsung SCX** (multifunction) | SCX-3200, 3400, 4100–4623, 5330, 5530 | |
+| **Samsung CLP/CLX** (colour) | CLP-300/310/315, CLP-500–610, CLX-2160/2170/3160 | Colour uses other compression modes (JBIG); this build disables JBIG. |
+| **Xerox** (Samsung-built) | Phaser 3020, 3052, 3115–3160, 3260, 3420/3425, 5500, 6100/6110 · WorkCentre 3025, 3119, 3215, 3225, PE16, PE114e | 3020/3025 are SPL only; 3260/3225 also speak PCL. |
+| **Others** | Dell 1100/1110 · Lexmark X215 · Toshiba e-STUDIO 180S | |
+
+Printers that also speak **PCL or PostScript** usually work with a generic macOS driver and
+don't need this. For **SPL-only** models, adapting this repo mostly means using the matching
+PPD from SpliX (`ppd/*.drv.in`) instead of `hp107a.ppd`, and checking that the printer appears
+in `./diagnose.sh`. If you get another model working, please open an issue or a pull request
+so it can be listed as tested.
+
 ## Troubleshooting
 
 * Run `./diagnose.sh`. It writes `diagnose-report.txt` with the queue state, the printer's USB
